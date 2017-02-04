@@ -26,9 +26,13 @@
 
 
 <script type="text/javascript">
-  VK.init(function() {
-     console.log('hello');
-  });
+
+
+var query = `https://api.vk.com/method/friends.get?uid=47617807`;
+        
+            $.get(query, function(data, status){ 
+                console.log(data)
+            });
 </script>
 
 5777716
