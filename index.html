@@ -13,7 +13,7 @@
     <!-- // <script src="get_likes.js"></script> -->
     <!-- // <script src="get_likes.js"></script> -->
     <!-- // <script src="graphClass.js"></script> -->
-    <!-- // <script src="get_friends.js"></script> -->
+    <script src="get_friends.js"></script>
     <!-- // <script src="test_wyler.js"></script> -->
     <!-- // <script src="test_data/test_full.js"></script> -->
     <!-- // <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis.min.js"></script> -->
@@ -26,8 +26,17 @@
 
 
 <script type="text/javascript">
+
+var graph = {   "nodeToFriends": {},
+            "friends":[
+                359230670,307501540,357107409,291400759,272720377,250613289,218868103,210158660,201455615,199809447,189947721,186209168,181003792,178133631,169764237,154055696,153473095,145350945,140257884,134759348,134618166,134496510
+            ]
+        }
   VK.init(function() {
-     console.log('hello');
+     VK.api("users.search", {"fields":"photo_50", "lang":"ru","q":"rwyler"}, function(data) { 
+        console.log(data)
+        });
+     get_friends(graph)
   });
 </script>
 
