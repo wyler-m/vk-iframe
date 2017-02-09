@@ -3,41 +3,723 @@
 
 <head>
     <title>VK Visualizer</title>
-    <!-- <link rel="stylesheet" href="css/vis.css"> -->
+    <link rel="stylesheet" href="css/vis.css">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- <link rel="stylesheet" href="css/w3.css"> -->
+    <link rel="stylesheet" href="css/w3.css">
     <meta charset="utf-8">
     <!-- // <script src="https://d3js.org/d3.v4.min.js"></script> -->
-    <!-- // <script src="setOps.js"></script> -->
-    <!-- // <script src="get_centrality.js"></script> -->
+    <script src="setOps.js"></script>
+    <script src="get_centrality.js"></script>
     <!-- // <script src="get_likes.js"></script> -->
-    <!-- // <script src="get_likes.js"></script> -->
-    <!-- // <script src="graphClass.js"></script> -->
+    <script src="get_likes.js"></script>
+    <script src="graphClass.js"></script>
     <script src="get_friends.js"></script>
     <!-- // <script src="test_wyler.js"></script> -->
-    <!-- // <script src="test_data/test_full.js"></script> -->
+    <script src="test_data/test_full.js"></script>
     <!-- // <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis.min.js"></script> -->
-    <!-- // <script type="text/javascript" src="vis.js"></script> -->
+    <script type="text/javascript" src="vis.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
-    <!-- // <script src="http://vkontakte.ru/js/api/xd_connection.js" type="text/javascript"></script> -->
-    <script src="https://vk.com/js/api/xd_connection.js?2" type="text/javascript"></script>
     <!-- // <script type="text/javascript" src="jLouvain.js"></script> -->
 </head>
 
+<body>
+    <menu id="controlDiv">
+        <div id="hideDiv">
+            <h1 id="logo"><img src= "img/vk.svg"> visualizer</h1>
+            <h4 id="foundName"></h4>
+            <input id="vkId" class="w3-input w3-border w3-hover-blue" value="16081499">
+            </p>
+            <a id="buildGraphButton" class="w3-btn-block w3-hover-blue w3-border w3-border-blue w3-white" onclick="build_graph()">Строй График</a>
+            <a id="Subgraph" class="w3-btn-block w3-hover-blue w3-border w3-border-blue w3-white" onclick="take_subgraph()">Subgraph</a>
+            <button onclick="collaps_control('node_controls')" class="w3-btn-block w3-hover-blue w3-border w3-border-blue w3-white">Node Size</button>
+            <div id="node_controls" class="w3-accordion-content">
+                
+                scaling
+                <div class="w3-btn-bar">
+                        <img id="quadID" src="http://img.sparknotes.com/figures/F/fa846fa782f745cd8a6fc1cebcb8e275/exp1.gif"class="w3-btn w3-hover-red w3-border w3-border-red w3-white" onclick="update_node_normalization('quad')"style="width:33.3%">
+                        <img id="linearID" src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/75/Linear_sorption_isotherm.svg/656px-Linear_sorption_isotherm.svg.png" class="w3-btn w3-hover-red w3-border w3-border-red w3-white" onclick="update_node_normalization('linear')"style="width:33.3%">
+                        <img id="logID" src="http://www.itl.nist.gov/div898/handbook/eda/section3/gif/expcdf.gif" class="w3-btn w3-hover-red w3-border w3-border-red w3-white" onclick="update_node_normalization('log')"style="width:33.3%">
 
-<script type="text/javascript">
+                </div>
+                normalization
+                <div class="w3-btn-bar">
+                  <button id="falseID" style="width:50%" class="w3-btn w3-hover-red w3-border w3-border-red w3-white" onclick="update_node_use_rank('false')">raw</a>
+                  <button id="trueID" style="width:50%" class="w3-btn w3-hover-red w3-border w3-border-red w3-white" onclick="update_node_use_rank('true')">indexed</a>
+                </div>
+                weights
+                    <button id="centralityID" class="w3-btn-block w3-hover-red w3-border w3-border-red w3-white" style="width:90%" onclick="update_node_weight_type('centrality')">centrality</button>
+                    <button id="degreeID" class="w3-btn-block w3-hover-red w3-border w3-border-red w3-white" style="width:90%" onclick="update_node_weight_type('degree')">degree</button>
+                    <button id="popularityDegID" class="w3-btn-block w3-hover-red w3-border w3-border-red w3-white" style="width:90%" onclick="update_node_weight_type('popularityDeg')">"popularityDeg"</button>
+               
+                <button id="receivedID" class="w3-btn-block w3-hover-red w3-border w3-border-red w3-white" style="width:90%" onclick="update_node_weight_type('received')">received likes</button>
+                </br>
+                <button id="givenID" class="w3-btn-block w3-hover-red w3-border w3-border-red w3-white" style="width:90%" onclick="update_node_weight_type('given')">given likes</button>
+                </br>
+                
+                <div class="w3-progress-container w3-round w3-large w3-round" id="likesProgbarContainer" hidden>
+                    <div class="w3-progressbar w3-round w3-red w3-text-black" id="likesProgbar" style="width:0%"></div>
+                </div>
+                </div>
+            
+            <button onclick="collaps_control('followers_controls')" class="w3-btn-block w3-hover-blue w3-border w3-border-blue w3-white">Edge Type</button>
+            <div id="followers_controls" class="w3-accordion-content">
+                <button id="completeID" class="w3-btn-group w3-hover-red w3-border w3-border-red w3-white" style="width:90%" onclick="set_type_edges('complete')">Friends And Followers</button>
+                </br>
+                <button id="mutualID" class="w3-btn-group w3-hover-red w3-border w3-border-red w3-white" style="width:90%" onclick="set_type_edges('mutual')">No followers</button>
+                </br>
+                <button id="one_wayID" class="w3-btn-group w3-hover-red w3-border w3-border-red w3-white" style="width:90%" onclick="set_type_edges('one_way')">Only Followers</button>
+                </br>
+                <button id="likesID" class="w3-btn-group w3-hover-red w3-border w3-border-red w3-white" style="width:90%" onclick="set_type_edges('likes')">Likes</button>
+                </br>
+            </div>
+            <button class="w3-btn-block w3-hover-blue w3-border w3-border-blue w3-white" onclick="showNodeLables()" id="toggleLabels">Show Labels</button>
+        </div>
+        <br>
+        <button href="javascript:void(0)" onclick="w3_close()" id="closeMenu" class="w3-btn w3-small w3-round-xxlarge w3-hover-blue w3-border w3-border-blue w3-white">
+            <</button>
+                <button href="javascript:void(0)" onclick="w3_open()" id="openMenu" class="w3-btn w3-small w3-round-xxlarge w3-hover-blue w3-border w3-border-blue w3-white">></button>
+    </menu>
+    <div id="container">
+        <div id="nodeInfo">
+            <center>
+                <img id="selectedPic" class="w3-btn-block" src=''>
+                <a id="selectedName" class="w3-btn-block w3-hover-blue w3-border w3-border-blue w3-white" target="_blank" href="#">name</a>
+                <a id="selectedImportance" class="w3-btn-block w3-white w3-border w3-border-blue">importance</p>
+                <a id="selectedDegree"class="w3-btn-block w3-white w3-border w3-border-blue">0</a>
+                <a id="buildSelected" class="w3-btn-block w3-hover-blue w3-white w3-border w3-border-blue" target="_blank" href="https">Строй График</a>
+            </center>
+        </div>
+        <div class="w3-display-container" id="test">
+            <div class="w3-card-4 w3-display-bottommiddle">
+                <button class="w3-btn-block w3-hover-blue w3-red" onclick="freeze_graph()" id="freezeGraph" style="display:none;">Click to Freeze</button>
+            </div>
+            <div class="w3-card-4 w3-display-middle w3-white w3-border w3-border-blue w3-round-xlarge" style="display:none;z-index:1" id="graphingCard">
+                <header class="w3-container">
+                    <h5 id="welcome"></h5>
+                </header>
+                <div class="w3-container" id="progressContainer">
+                    <div class="w3-progress-container w3-round w3-large ">
+                        <div class="w3-progressbar w3-round w3-blue" id="progbar" style="width:0%"></div>
+                    </div>
+                    <footer class="w3-container">
+                        <h5 id="friendList"></h5>
+                    </footer>
+                </div>
+            </div>
+            <div class="w3-card-4 w3-display-middle w3-white w3-border w3-border-blue w3-round-xlarge" style="display:block;z-index:1;padding:10px" id="searchCard">
+                <div id="searchDiv" hidden>
+                    <header class="w3-container">
+                        <h4 id="foundNameCenter">Напиши Кличку</h4>
+                    </header>
+                    <div class="w3-container" id="search"></div>
+                    <input id="searchBox" class="w3-input w3-border w3-hover-blue" value="" oninput="search_Input()">
+                    </p>
+                    <button class="w3-btn-block w3-hover-blue w3-border w3-border-blue w3-white" onclick="build_graph()">Строй График</button>
+                    </br>
+                    <footer class="w3-container">
+                        <h5 id="friendList"> </h5>
+                    </footer>
+                </div>
+                <div id="loginDiv">
+                    <a class="w3-btn-block w3-hover-blue w3-border w3-border-blue w3-white" id="loginP" href="https://oauth.vk.com/authorize?client_id=4966960&display=page&redirect_uri=https://wyler-m.github.io/vk-net/&scope=friends&response_type=token&v=5.60">Войти на VK.com</a>
+                </div>
+            </div>
+            <div id="mynetwork" class="wrapper" hidden></div>
+        </div>
+    </div>
+    <div id="data" class="wrapper"></div>
+    <a href="" id="download" target="_blank" download="graph.html">Save Image</a>
+    <button type="button" onclick="canvas_image()">get image</button>
+    <button type="button" onclick="save_build()">save build</button>
+    <button type="button" style="margin-right:200px" onclick="test_build()">test build</button>
+</body>
 
-var graph = {   "nodeToFriends": {},
-            "friends":[
-                359230670,307501540,357107409,291400759,272720377,250613289,218868103,210158660,201455615,199809447,189947721,186209168,181003792,178133631,169764237,154055696,153473095,145350945,140257884,134759348,134618166,134496510
-            ]
+  <script>
+
+function collaps_control(id) {
+    var x = document.getElementById(id);
+    if (x.className.indexOf("w3-show") == -1) {
+        x.className += " w3-show";
+    } else { 
+        x.className = x.className.replace(" w3-show", "");
+    }
+}
+$("#openMenu").hide();
+function w3_open() {
+    document.getElementById("hideDiv").style.display = "block";
+    $("#openMenu").toggle();
+    $("#closeMenu").toggle();        
+
+}
+function w3_close() {
+    document.getElementById("hideDiv").style.display = "none";
+    $("#openMenu").toggle();
+    $("#closeMenu").toggle();        
+   }
+
+
+function search_Input(){
+    var q = document.getElementById("searchBox").value
+
+
+    if (q) {
+      var query = "https://api.vk.com/method/users.search?fields=photo_50&lang=ru&q="+q+"&access_token="+access_token
+    
+    
+
+    $.get(query, function(data, status){ 
+      if (("response" in data)&&(data.response[0]==1)) {
+        $("#foundNameCenter").text(data.response[1].first_name+" "+data.response[1].last_name)
+        $("#foundName").text(data.response[1].first_name+" "+data.response[1].last_name)
+        document.getElementById("vkId").value = data.response[1]["uid"];
+      } else {
+         if (q.slice(0,1) == "id") 
+         {q = q.split("id").pop();}
+         console.log(q)
+         var query = "https://api.vk.com/method/getProfiles?lang=ru&uid="+q;
+         $.get(query, function(data, status){ 
+            console.log(data)
+               $("#foundNameCenter").text(data.response[0].first_name+" "+data.response[0].last_name)
+               $("#foundName").text(data.response[0].first_name+" "+data.response[0].last_name)
+               document.getElementById("vkId").value = data.response[0].uid;
+         })
+      };
+    })
+
+    } else{
+      if (global_user_id) {
+         document.getElementById("vkId").value = global_user_id; 
+         var query = "https://api.vk.com/method/getProfiles?lang=ru&uid="+global_user_id;
+         $.get(query, function(data, status){ 
+            console.log(data)
+               $("#foundNameCenter").text(data.response[0].first_name+" "+data.response[0].last_name)
+               $("#foundName").text(data.response[0].first_name+" "+data.response[0].last_name)
+               document.getElementById("vkId").value = data.response[0].uid;
+         })
+      } else{
+        $("#foundName").text("")
+        $("#vkId").attr("value","asd");
+      };
+        
+
+    };
+
+  }
+
+
+so = setOps;
+access_token = null;
+global_user_id = null;
+params = parseURLParams();
+graph_dict = {}
+
+if (params) {
+  for (var param in params) {
+     if (param == "user_id") {
+         global_user_id=params.user_id; 
+        document.getElementById("vkId").value = global_user_id; 
+         var query = "https://api.vk.com/method/getProfiles?lang=ru&uid="+global_user_id;
+         $.get(query, function(data, status){ 
+            console.log(data)
+               $("#foundNameCenter").text(data.response[0].first_name+" "+data.response[0].last_name)
+               $("#foundName").text(data.response[0].first_name+" "+data.response[0].last_name)
+               document.getElementById("vkId").value = data.response[0].uid;
+               $("#searchBox").val("Напиши Кличку")
+         })
+
+
+      };
+      if (param == "access_token"){
+        $("#loginP").hide();  
+        $("#searchDiv").show(); 
+        $("#calcLikes").show();
+
+        access_token = params.access_token;
+      }
+   }; 
+};
+
+function showLikeRelatedElements() {
+   $("#givenID").show();
+   $("#receivedID").show();
+   $("#likesID").show();
+}
+
+function build_graph(test){
+  $("#calcLikes").show();
+  $("#searchCard").hide();
+	$("#mynetwork").hide();
+  $("#nodeInfo").hide();
+  $("#receivedID").hide();
+  $("#givenID").hide();
+  $("#likesID").hide();
+	$("#graphingCard").show()	
+	$("#graphingCard").attr("class","w3-card-4 w3-display-middle w3-white w3-border w3-border-blue w3-round-xlarge");
+	$("#progressContainer").show();
+	
+
+	cur_graph = new graph;
+  console.log(cur_graph)
+		
+    options = {
+      nodes: {
+        shape: 'dot',
+        scaling: {
+          min: 3,
+          max: 30
+        },
+        font: {
+          size: 0,
+          face: 'Tahoma'
         }
-  VK.init(function() {
-     VK.api("users.search", {"fields":"photo_50", "lang":"ru","q":"rwyler"}, function(data) { 
-        console.log(data)
-        });
-     get_friends(graph)
+      },
+      edges: {
+        width: 0.15,
+        color: {inherit: 'from',
+        opacity:.5},
+        smooth: {
+          type: 'continuous'
+        },
+        chosen:true
+      },
+
+      physics: {
+        stabilization: {
+          iterations:100
+        },
+        adaptiveTimestep: true,
+        timestep: .5,
+        // forceAtlas2Based: {
+        // barnesHut: {
+          repulsion:{
+          gravitationalConstant: -80000,
+          damping: 0.4,
+          springConstant: 2,
+          springLength: 10,
+        }
+      },
+
+      interaction: {
+        tooltipDelay: 10,
+        hideEdgesOnDrag: true
+      }
+    };
+    data_set = new vis.DataSet(options);
+
+	if (!test) { 
+    fetchFriendList();
+    };
+	};
+
+w3_close()
+$("#loginDiv").show();
+$("#nodeInfo").hide();
+$("#givenID").hide();
+$("#receivedID").hide();
+$("#buildSelected").hide();
+// $("#calcLikes").hide();
+
+
+$("#selectedName").click(function(){
+});
+
+$("#buildSelected").click(function(){
+});
+
+function ga_onclick(element,action){
+      ga( 'send', 'event', {
+          'eventCategory': 'link out',
+          'eventAction': action,
+          'eventLabel': $(element).attr("href")
+        }); 
+  }
+
+function insertNodeInfo (argument) {
+  var nodeInfo = data_set.get(argument.nodes[0])
+  if (cur_graph.nodeToFriends[nodeInfo.id]) {
+    var total_friends = cur_graph.nodeToFriends[argument.nodes[0]].length;
+  }else {var total_friends = 0
+  };
+  $("#nodeInfo").toggle();
+  // $("#controlDiv").toggle();
+
+  $("#selectedName").text(nodeInfo.label);
+  $("#foundName").text(nodeInfo.label);
+
+  $("#toolTipName").attr("innerHTML","nodeInfo.label");
+  $("#selectedPic").attr("src",nodeInfo.small_pic);
+
+  $("#selectedImportance").text("Average Rank: " + nodeInfo.value);
+  document.getElementById("vkId").value = nodeInfo.id;
+
+  if (nodeInfo.id in cur_graph.weightsDictionary.degree) {
+    $("#selectedDegree").text("Connections: " + cur_graph.weightsDictionary.degree[nodeInfo.id]);
+  } else {$("#selectedDegree").text("no connections")};
+  
+  $("#selectedName").attr("href","https://www.vk.com/id"+nodeInfo.id);
+
+  if (nodeInfo.id && (nodeInfo.small_pic!="https://vk.com/images/deactivated_100.png")){
+    $("#buildSelected").text("Строй График ("+ total_friends + " friends)");
+    $("#buildGraphButton").text("Строй График ("+ total_friends + " friends)");
+    $("#buildSelected").attr("href","https://wyler-m.github.io/vk-net#user_id="+nodeInfo.id);
+    $("#buildSelected").show();
+
+  } else {$("#buildSelected").hide();};
+
+};
+
+function parseURLParams() {
+    var params = {};
+    var args = window.location.href.split('#');
+    if (args[1]) {
+      var param_array = args[1].split('&');
+      for(var i in param_array){
+          x = param_array[i].split('=');
+          params[x[0]] = x[1];
+      }
+    };
+    return params;
+}
+
+function update_progress(total_v, current_v){
+  var progbar = document.getElementById("progbar");
+  var text = document.getElementById("friendList");
+  if (current_v >= 0 ) {
+    text.innerHTML = "Added "+ (total_v - current_v)*25 +" of " + total_v*25 + " friends";
+    progbar.style.width = (total_v - current_v)/total_v *100 +'%';
+    } else {progbar.style.width = 0 +'%'; text.innerHTML = ""; } ;
+}
+
+
+function freeze_graph(){  
+  if (network) {
+    network.stopSimulation();
+  };
+}
+ 
+function fetchCityInfo(){
+  var city_ids = cur_graph.unique_cities.join();
+  var query = 'https://api.vk.com/method/database.getCitiesById?city_ids='.concat(city_ids,'&lang=ru&');
+
+  $.get(query, function(result, status){              
+         var cityArray = result["response"];
+    for (var element in cityArray){
+      cur_graph.city_dict[cityArray[element].cid] = cityArray[element].name;
+    }
   });
+}
+
+
+function fetchDetails(id) {
+    var y = '';
+    if (access_token) {
+      y = "&access_token="+access_token;
+    };
+
+    var query = 'https://api.vk.com/method/users.get?uids='.concat(id,y,'&lang=ru&fields=first_name,last_name,city,country,universities,schools,sex,bdate,home_town,photo_200,status,photo_100');   
+
+    $.get(query, function(result, status){              
+      if ('error' in result) {
+        console.log("error in fetch result",result)
+        fetchDetails(result.error.request_params[2].value)
+      } 
+    else {
+      if (!cur_graph.first_pass) {
+      var res_array = result["response"];
+        cur_graph.add_details_array(res_array);
+        fetchCityInfo();
+      } 
+      else {
+      var res = result["response"][0];
+        cur_graph.first_pass = false;
+        cur_graph.init_owner(res);
+        document.getElementById("welcome").innerHTML = res.first_name +" "+res.last_name;
+      };
+    };    
+});}
+
+
+
+
+function fetchFriendList(id) {
+    if (!id) {
+      var x;
+      x = document.getElementById("vkId").value;
+      fetchDetails(x);
+    } else {x = id; cur_graph.currentNode = id;};
+
+    var y = '';
+    if (access_token) {
+      y = "&access_token="+access_token;
+    };
+
+    //get the list of friends
+    var query = 'https://api.vk.com/method/friends.get?uid='.concat(x,y,'&order=hints');
+
+    $.get(query, function(result, status){
+    //add friends  to current graph
+      cur_graph.init_friends(result);  
+
+      //get the details for the nodes
+      var nodes = Object.assign([], cur_graph.friends); 
+      while (nodes.length>0){
+          var node = nodes.splice(0,100);
+          fetchDetails(node.join());  
+      } 
+      //builds all the links, delayed based on the number of calls to get node deatials
+      setTimeout(function() {
+        get_friends(cur_graph,access_token);
+      }, 3*cur_graph.friends.length);   
+    })
+}
+
+
+//used in get_friends method
+function init_graph(){ 
+    cur_graph.add_all_connections();
+    cur_graph.weight_nodes_popularity();
+    cur_graph.weight_nodes_popularity_deg();
+    cur_graph.set_weights();
+    cur_graph.add_city_info()
+    data_set
+    w3_open()
+    redrawAll(); 
+}
+
+function take_subgraph() {
+
+   var parent = network.getSelectedNodes()
+   var selected = network.getConnectedNodes(parent);
+
+
+// get all the edges in a group
+   var sub_edges = [];
+   cur_graph.edges[cur_graph.current_edges_dict].forEach( function(element, index) {
+      if ((selected.indexOf(element.to)>-1)&&(selected.indexOf(element.from)>-1)){
+            sub_edges.push(element)
+      }
+   });
+
+   cur_graph.new_edge_dict = true;
+   network.storePositions();
+   data_set.update(data_set.get(selected))
+   var data = {
+       nodes: data_set,
+       edges: sub_edges // cur_graph.edges.one_way
+     };
+
+   network.setData(data);
+     setTimeout(function() {
+       network.stopSimulation();
+     },3000);
+
+
+}
+
+function set_type_edges(type) {
+   set_colors_edges(type)
+   cur_graph.current_edges_dict = type;
+  cur_graph.new_edge_dict = true;
+  network.storePositions();
+  var data = {
+    nodes: data_set,
+    edges: cur_graph.edges[type] // cur_graph.edges.one_way
+  };
+  network.setData(data);
+  setTimeout(function() {
+    network.stopSimulation();
+  },3000);
+}
+
+
+function construct_like_dict(){
+  $("#likesProgbarContainer").show();
+  cur_graph.weightsDictionary["given"] = {};
+  cur_graph.weightsDictionary["received"] = {};
+  var likes_weighted_edges = [];
+  build_like_dictionary(cur_graph,access_token);
+}
+
+function showNodeLables(){
+
+      options.nodes.font.size = (options.nodes.font.size == 0) ? 14 : 0 
+      var text = $("#toggleLabels").text();
+      $("#toggleLabels").text(text == "Show Labels" ? "Hide Labels" :"Show Labels");
+
+       network.setOptions(options);
+       network.redraw();
+       network.stopSimulation();
+ };
+
+
+
+// cur_graph.new_edge_dict = false;
+
+colored_node_buttons = ["log","quad","linear","degree","centrality","true","false","degree","centrality","popularityDeg","received","given"];
+function set_colors_weights(){
+   
+   so.complement(colored_node_buttons,cur_graph.weight_dict_name.split(" ")).forEach(function(id){
+    var x = document.getElementById(id+"ID");
+    x.className = x.className.replace(" w3-blue", " w3-white");      
+   });
+   cur_graph.weight_dict_name.split(" ").forEach(function(id){
+    var x = document.getElementById(id+"ID");
+    x.className = x.className.replace(" w3-white", " w3-blue");
+   });
+ }
+
+
+colored_edge_buttons = ["complete","mutual","one_way","likes"];
+function set_colors_edges(id){
+   colored_edge_buttons.forEach(function(potential_id){
+         var x = document.getElementById(potential_id+"ID");
+         x.className = x.className.replace(" w3-blue", " w3-white");      
+   });
+
+    var x = document.getElementById(id+"ID");
+    x.className = x.className.replace(" w3-white", " w3-blue");
+}
+
+function update_node_normalization (input) {
+  //normilzation can be linear, quad, or log
+  cur_graph.node_normalization = input;
+  change_node_size(input)
+}
+
+function update_node_use_rank (input) {
+  // true or false
+  cur_graph.node_use_rank = input;
+  change_node_size(input)
+}
+
+function update_node_weight_type (input) {
+  //weigh_type is the name of the weight dictionary being used: degree,centrality,popularity,popularityDeg 
+  cur_graph.node_weight_type = input;
+  change_node_size()
+}
+
+function change_node_size(){
+  
+  if (!("centrality" in cur_graph.weightsDictionary) || cur_graph.new_edge_dict) { 
+    console.log("centrality calculated");
+    cur_graph.weightsDictionary["centrality"] = get_centrality(cur_graph,network)
+    cur_graph.new_edge_dict = false;
+  };
+  
+  cur_graph.update_weight_dict_name()                
+  set_colors_weights();
+  cur_graph.normalize_weights();
+  cur_graph.set_weights(data_set);
+  network.redraw();
+  network.stopSimulation()
+}
+
+function test_build(){
+
+build_graph(true);
+cur_graph = test_data
+redrawAll()
+
+}
+
+function save_build(){
+    test_data = cur_graph;
+    document.getElementById("data").innerHTML = JSON.stringify(test_data);
+
+}
+    
+
+function canvas_image(){
+  var canvas = document.getElementsByTagName("canvas");
+  var img    = canvas[0].toDataURL("image/png");
+  var img2    = canvas[0].toDataURL("data:application/octet-stream");
+  var apple = document.getElementById("download");
+  apple.href = img2;
+  
+}
+
+
+//Строй График
+function redrawAll() {
+
+  $("#graphingCard").attr("class", "w3-card-4 w3-display-topmiddle w3-white w3-border w3-border-blue w3-round-xlarge");
+  $("#progressContainer").hide();
+  $("#mynetwork").show();
+
+
+  // create a network
+  var container = document.getElementById('mynetwork');
+
+  data_set.add(cur_graph.nodes);
+
+  var data = {
+    nodes: data_set,
+    edges: cur_graph.edges.mutual // cur_graph.edges.one_way 
+  };
+
+  network = new vis.Network(container, data, options);
+
+  network.on("stabilized", function(params) {
+    $("#freezeGraph").hide();
+  });
+  network.on("startStabilizing", function(params) {
+    $("#freezeGraph").show();
+  });
+  network.on("selectNode", function(params) {
+
+    console.log(params)
+    insertNodeInfo(params);
+    var parent = params.nodes[0];
+    var selected_nodes = network.getConnectedNodes(parent);
+    selected_nodes.push(parent);
+    hide_unhide_selected(so.complement(data_set.getIds(), selected_nodes), selected_nodes, true)
+    network.stopSimulation()
+  });
+
+  network.on("dragEnd", function(params) {
+    setTimeout(function() {
+      network.stopSimulation();
+    }, 3000);
+  });
+
+  network.on("deselectNode", function(params) {
+    $("#nodeInfo").hide();
+    var parent = params.nodes[0];
+    var selected = network.getConnectedNodes(parent);
+    selected.push(parent)
+    hide_unhide_selected(data_set.getIds(), selected, false)
+    network.stopSimulation()
+
+  });
+
+
+  function hide_unhide_selected(unselected, selected, hide) {
+    console.log("selected", selected, unselected, hide)
+    var nodes_to_hide = unselected.map(function(x) {
+      return {
+        "id": x,
+        "hidden": hide
+      }
+    })
+    data_set.update(nodes_to_hide);
+
+  }
+
+}
+
+
 </script>
 
-5777716
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-86997959-1', 'auto');
+  ga('send', 'pageview');
+</script>
+
+</html> 
+
+
+
