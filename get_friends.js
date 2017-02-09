@@ -8,7 +8,7 @@ function get_friends(graph){
 		
 			// $.get(query, function(data, status){ 
 			VK.api("execute",{"code":code}, function(data, status){ 
-				// update_progress(Object.keys(splice_dict).length-1, splice_index-1) // from index
+				update_progress(Object.keys(splice_dict).length-1, splice_index-1) // from index
 				if (splice_index>=0) {
 			 		if (data["error"]!=undefined) {
 						console.log("splice error",splice_index,data)
@@ -16,17 +16,14 @@ function get_friends(graph){
 			 			mass_friend_list(splice_dict,splice_index)
 			 		},300);
 			 		}else{
-				console.log(data.response)
-
 			 			$.extend(graph.nodeToFriends, data.response)
-			 			console.log(graph)
 			 			mass_friend_list(splice_dict,splice_index-1)
 			 		}	
 			 	}else{
 			 		$.extend(graph.nodeToFriends, data.response);
-			 		// init_graph(); // from index
+			 		init_graph(); // from index
 			 		// construct_like_dict() //from index
-			 		console.log(graph);
+			 		console.log("built graph",graph);
 				}	
 			})
 	}

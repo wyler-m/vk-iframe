@@ -14,10 +14,11 @@
     <script src="get_likes.js"></script>
     <script src="graphClass.js"></script>
     <script src="get_friends.js"></script>
+    <script src="https://vk.com/js/api/xd_connection.js?2" type="text/javascript"></script>
     <!-- // <script src="test_wyler.js"></script> -->
-    <script src="test_data/test_full.js"></script>
-    <!-- // <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis.min.js"></script> -->
-    <script type="text/javascript" src="vis.js"></script>
+    <!-- // <script src="test_data/test_full.js"></script> -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis.min.js"></script>
+    <!-- // <script type="text/javascript" src="vis.js"></script> -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
     <!-- // <script type="text/javascript" src="jLouvain.js"></script> -->
 </head>
@@ -120,9 +121,9 @@
                         <h5 id="friendList"> </h5>
                     </footer>
                 </div>
-                <div id="loginDiv">
-                    <a class="w3-btn-block w3-hover-blue w3-border w3-border-blue w3-white" id="loginP" href="https://oauth.vk.com/authorize?client_id=4966960&display=page&redirect_uri=https://wyler-m.github.io/vk-net/&scope=friends&response_type=token&v=5.60">Войти на VK.com</a>
-                </div>
+                <!-- <div id="loginDiv"> -->
+                    <!-- <a class="w3-btn-block w3-hover-blue w3-border w3-border-blue w3-white" id="loginP" href="https://oauth.vk.com/authorize?client_id=4966960&display=page&redirect_uri=https://wyler-m.github.io/vk-net/&scope=friends&response_type=token&v=5.60">Войти на VK.com</a> -->
+                <!-- </div> -->
             </div>
             <div id="mynetwork" class="wrapper" hidden></div>
         </div>
@@ -135,6 +136,12 @@
 </body>
 
   <script>
+
+
+VK.init(function() {
+        $("#searchDiv").show(); 
+});
+
 
 function collaps_control(id) {
     var x = document.getElementById(id);
@@ -160,14 +167,15 @@ function w3_close() {
 
 function search_Input(){
     var q = document.getElementById("searchBox").value
-
+    console.log("search_Input",q)
 
     if (q) {
       var query = "https://api.vk.com/method/users.search?fields=photo_50&lang=ru&q="+q+"&access_token="+access_token
     
-    
+    // testAPI
 
-    $.get(query, function(data, status){ 
+    // $.get(query, function(data, status){ 
+    VK.api("users.search",{"fields":"photo_50","lang":"ru","q":q}, function (data) {
       if (("response" in data)&&(data.response[0]==1)) {
         $("#foundNameCenter").text(data.response[1].first_name+" "+data.response[1].last_name)
         $("#foundName").text(data.response[1].first_name+" "+data.response[1].last_name)
@@ -175,10 +183,12 @@ function search_Input(){
       } else {
          if (q.slice(0,1) == "id") 
          {q = q.split("id").pop();}
-         console.log(q)
+         console.log("users.search",q)
          var query = "https://api.vk.com/method/getProfiles?lang=ru&uid="+q;
-         $.get(query, function(data, status){ 
-            console.log(data)
+         // $.get(query, function(data, status){ 
+        VK.api("getProfiles",{"lang":"ru","uid":q}, function (data) {
+         
+            console.log("getProfiles",data)
                $("#foundNameCenter").text(data.response[0].first_name+" "+data.response[0].last_name)
                $("#foundName").text(data.response[0].first_name+" "+data.response[0].last_name)
                document.getElementById("vkId").value = data.response[0].uid;
@@ -190,8 +200,10 @@ function search_Input(){
       if (global_user_id) {
          document.getElementById("vkId").value = global_user_id; 
          var query = "https://api.vk.com/method/getProfiles?lang=ru&uid="+global_user_id;
-         $.get(query, function(data, status){ 
-            console.log(data)
+         // $.get(query, function(data, status){ 
+        VK.api("getProfiles",{"fields":"photo_50","lang":"ru","uid":global_user_id}, function (data) {
+
+            console.log("getProfiles",data)
                $("#foundNameCenter").text(data.response[0].first_name+" "+data.response[0].last_name)
                $("#foundName").text(data.response[0].first_name+" "+data.response[0].last_name)
                document.getElementById("vkId").value = data.response[0].uid;
@@ -210,34 +222,33 @@ function search_Input(){
 so = setOps;
 access_token = null;
 global_user_id = null;
-params = parseURLParams();
+// params = parseURLParams();
 graph_dict = {}
 
-if (params) {
-  for (var param in params) {
-     if (param == "user_id") {
-         global_user_id=params.user_id; 
-        document.getElementById("vkId").value = global_user_id; 
-         var query = "https://api.vk.com/method/getProfiles?lang=ru&uid="+global_user_id;
-         $.get(query, function(data, status){ 
-            console.log(data)
-               $("#foundNameCenter").text(data.response[0].first_name+" "+data.response[0].last_name)
-               $("#foundName").text(data.response[0].first_name+" "+data.response[0].last_name)
-               document.getElementById("vkId").value = data.response[0].uid;
-               $("#searchBox").val("Напиши Кличку")
-         })
+// if (params) {
+//   for (var param in params) {
+//      if (param == "user_id") {
+//          global_user_id=params.user_id; 
+//         document.getElementById("vkId").value = global_user_id; 
+//          var query = "https://api.vk.com/method/getProfiles?lang=ru&uid="+global_user_id;
+//          $.get(query, function(data, status){ 
+//             console.log(data)
+//                $("#foundNameCenter").text(data.response[0].first_name+" "+data.response[0].last_name)
+//                $("#foundName").text(data.response[0].first_name+" "+data.response[0].last_name)
+//                document.getElementById("vkId").value = data.response[0].uid;
+//                $("#searchBox").val("Напиши Кличку")
+//          })
 
 
-      };
-      if (param == "access_token"){
-        $("#loginP").hide();  
-        $("#searchDiv").show(); 
-        $("#calcLikes").show();
+//       };
+//       if (param == "access_token"){
+//         $("#loginP").hide();  
+//         $("#calcLikes").show();
 
-        access_token = params.access_token;
-      }
-   }; 
-};
+//         access_token = params.access_token;
+//       }
+//    }; 
+// };
 
 function showLikeRelatedElements() {
    $("#givenID").show();
@@ -246,20 +257,20 @@ function showLikeRelatedElements() {
 }
 
 function build_graph(test){
-  $("#calcLikes").show();
-  $("#searchCard").hide();
-	$("#mynetwork").hide();
-  $("#nodeInfo").hide();
-  $("#receivedID").hide();
-  $("#givenID").hide();
-  $("#likesID").hide();
+    $("#calcLikes").show();
+    $("#searchCard").hide();
+    $("#mynetwork").hide();
+    $("#nodeInfo").hide();
+    $("#receivedID").hide();
+    $("#givenID").hide();
+    $("#likesID").hide();
 	$("#graphingCard").show()	
 	$("#graphingCard").attr("class","w3-card-4 w3-display-middle w3-white w3-border w3-border-blue w3-round-xlarge");
 	$("#progressContainer").show();
 	
 
 	cur_graph = new graph;
-  console.log(cur_graph)
+    console.log("cur_graph",cur_graph)
 		
     options = {
       nodes: {
@@ -312,7 +323,7 @@ function build_graph(test){
 	};
 
 w3_close()
-$("#loginDiv").show();
+// $("#loginDiv").show();
 $("#nodeInfo").hide();
 $("#givenID").hide();
 $("#receivedID").hide();
@@ -399,9 +410,11 @@ function freeze_graph(){
  
 function fetchCityInfo(){
   var city_ids = cur_graph.unique_cities.join();
-  var query = 'https://api.vk.com/method/database.getCitiesById?city_ids='.concat(city_ids,'&lang=ru&');
+  // var query = 'https://api.vk.com/method/database.getCitiesById?city_ids='.concat(city_ids,'&lang=ru&');
 
-  $.get(query, function(result, status){              
+  // $.get(query, function(result, status){  
+    VK.api("database.getCitiesById",{"city_ids":city_ids,"lang":"ru",}, function (data) {
+
          var cityArray = result["response"];
     for (var element in cityArray){
       cur_graph.city_dict[cityArray[element].cid] = cityArray[element].name;
@@ -417,11 +430,14 @@ function fetchDetails(id) {
     };
 
     var query = 'https://api.vk.com/method/users.get?uids='.concat(id,y,'&lang=ru&fields=first_name,last_name,city,country,universities,schools,sex,bdate,home_town,photo_200,status,photo_100');   
+        console.log('fetchDetails id',id)
 
-    $.get(query, function(result, status){              
+    // $.get(query, function(result, status){   
+    VK.api("users.get",{"uids":id,"lang":"ru","fields":["first_name","last_name","city","country","universities","schools","home_town","photo_200","status","photo_100"]}, function (result) {
+        console.log('fetchDetails result',result)
       if ('error' in result) {
         console.log("error in fetch result",result)
-        fetchDetails(result.error.request_params[2].value)
+        // fetchDetails(result.error.request_params[2].value)
       } 
     else {
       if (!cur_graph.first_pass) {
@@ -456,7 +472,9 @@ function fetchFriendList(id) {
     //get the list of friends
     var query = 'https://api.vk.com/method/friends.get?uid='.concat(x,y,'&order=hints');
 
-    $.get(query, function(result, status){
+    // $.get(query, function(result, status){
+    VK.api("friends.get",{"uid":x,"order":"hints",}, function (result) {
+
     //add friends  to current graph
       cur_graph.init_friends(result);  
 
@@ -476,6 +494,7 @@ function fetchFriendList(id) {
 
 //used in get_friends method
 function init_graph(){ 
+    console.log('graph initiated')
     cur_graph.add_all_connections();
     cur_graph.weight_nodes_popularity();
     cur_graph.weight_nodes_popularity_deg();
@@ -667,7 +686,7 @@ function redrawAll() {
   });
   network.on("selectNode", function(params) {
 
-    console.log(params)
+    console.log("selectNode",params)
     insertNodeInfo(params);
     var parent = params.nodes[0];
     var selected_nodes = network.getConnectedNodes(parent);
@@ -694,7 +713,7 @@ function redrawAll() {
 
 
   function hide_unhide_selected(unselected, selected, hide) {
-    console.log("selected", selected, unselected, hide)
+    console.log("hide_unhide_selected", selected, unselected, hide)
     var nodes_to_hide = unselected.map(function(x) {
       return {
         "id": x,
@@ -706,7 +725,6 @@ function redrawAll() {
   }
 
 }
-
 
 </script>
 

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>VK Visualizer</title>
+    <!-- <link rel="stylesheet" href="css/vis.css"> -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- <link rel="stylesheet" href="css/w3.css"> -->
+    <meta charset="utf-8">
+    <!-- // <script src="https://d3js.org/d3.v4.min.js"></script> -->
+    <!-- // <script src="setOps.js"></script> -->
+    <!-- // <script src="get_centrality.js"></script> -->
+    <!-- // <script src="get_likes.js"></script> -->
+    <!-- // <script src="get_likes.js"></script> -->
+    <!-- // <script src="graphClass.js"></script> -->
+    <script src="get_friends.js"></script>
+    <!-- // <script src="test_wyler.js"></script> -->
+    <!-- // <script src="test_data/test_full.js"></script> -->
+    <!-- // <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis.min.js"></script> -->
+    <!-- // <script type="text/javascript" src="vis.js"></script> -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <!-- // <script src="http://vkontakte.ru/js/api/xd_connection.js" type="text/javascript"></script> -->
+    <script src="https://vk.com/js/api/xd_connection.js?2" type="text/javascript"></script>
+    <!-- // <script type="text/javascript" src="jLouvain.js"></script> -->
+</head>
+
+
+<script type="text/javascript">
+
+var graph = {   "nodeToFriends": {},
+            "friends":[
+                359230670,307501540,357107409,291400759,272720377,250613289,218868103,210158660,201455615,199809447,189947721,186209168,181003792,178133631,169764237,154055696,153473095,145350945,140257884,134759348,134618166,134496510
+            ]
+        }
+  VK.init(function() {
+    console.log("asdasdas")
+         VK.api("users.get",{"uids":359230670,"lang":"ru","fields":["first_name","last_name","city","country","universities","schools","home_town","photo_200","status","photo_100"]}, function (result) {
+            console.log("result",result);
+        })
+  });
+</script>
+
+5777716
